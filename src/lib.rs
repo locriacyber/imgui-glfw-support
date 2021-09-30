@@ -18,7 +18,7 @@ use glfw::{
     Action, Cursor, CursorMode, Key as GlfwKey, Modifiers, MouseButton, StandardCursor, Window,
     WindowEvent,
 };
-use imgui::{BackendFlags, ConfigFlags, Context, ImString, Io, Key, Ui};
+use imgui::{BackendFlags, ConfigFlags, Context, Io, Key, Ui};
 
 pub struct GlfwPlatform {
     hidpi_mode: ActiveHiDpiMode,
@@ -52,19 +52,19 @@ struct Clipboard {
 }
 
 impl imgui::ClipboardBackend for Clipboard {
-    fn set(&mut self, s: &imgui::ImStr) {
+    fn set(&mut self, s: &str) {
         unsafe {
-            glfw::ffi::glfwSetClipboardString(self.window_ptr, s.as_ptr());
+            glfw::ffi::glfwSetClipboardString(self.window_ptr, s.as_ptr() as *const i8);
         }
     }
-    fn get(&mut self) -> std::option::Option<imgui::ImString> {
+    fn get(&mut self) -> std::option::Option<String> {
         unsafe {
             let s = glfw::ffi::glfwGetClipboardString(self.window_ptr);
             let s = std::ffi::CStr::from_ptr(s);
             let bytes = s.to_bytes();
             if !bytes.is_empty() {
                 let v = String::from_utf8_lossy(bytes);
-                Some(imgui::ImString::new(v))
+                Some(v.into())
             } else {
                 None
             }
@@ -116,10 +116,10 @@ impl GlfwPlatform {
         io[Key::X] = GlfwKey::X as _;
         io[Key::Y] = GlfwKey::Y as _;
         io[Key::Z] = GlfwKey::Z as _;
-        imgui.set_platform_name(Some(ImString::from(format!(
+        imgui.set_platform_name(Some(format!(
             "imgui-glfw-support {}",
             env!("CARGO_PKG_VERSION")
-        ))));
+        )));
         GlfwPlatform {
             hidpi_mode: ActiveHiDpiMode::Default,
             hidpi_factor: 1.0,
@@ -132,7 +132,7 @@ impl GlfwPlatform {
     pub unsafe fn set_clipboard_backend(&self, imgui: &mut Context, window: &Window) {
         use glfw::Context;
         let window_ptr = window.window_ptr();
-        imgui.set_clipboard_backend(Box::new(Clipboard { window_ptr }));
+        imgui.set_clipboard_backend(Clipboard { window_ptr });
     }
 
     /// Attaches the platform instance to a glfw window.

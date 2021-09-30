@@ -11,14 +11,14 @@ keywords = ["imgui", "glfw", "wgpu"]
 description = "GLFW support for imgui-rs"
 
 [dependencies]
+imgui = "0.8"
 glfw = "*"
-imgui = "*"
 
 [features]
 vulkan = ["glfw/vulkan"]
 image = ["glfw/image"]
 
 [dev-dependencies]
-wgpu = "0.6"
-imgui-wgpu = "0.10"
-futures = "0.3"
+wgpu = "*"
+imgui-wgpu = "*"
+futures = "*"
